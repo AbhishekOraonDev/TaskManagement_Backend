@@ -5,6 +5,7 @@ import User from "../models/userModel"; // Adjust path as needed
 import { catchAsyncError } from "../utils/catchAsyncError";
 import ErrorHandler from "../utils/ErrorHandler";
 import { AuthenticatedRequest } from "../types";
+import Task from "../models/taskModel";
 
 // Schema for Input Validation
 const userSchema = Joi.object({
@@ -98,29 +99,45 @@ const editUser = catchAsyncError(async (req: AuthenticatedRequest, res: Response
 });
 
 
-const fetchProfile = catchAsyncError(async(req: AuthenticatedRequest, res: Response, next: NextFunction) => {
 
-    // ensure if user exists in request
-    if(!req.user) return next(new ErrorHandler("Unauthorized user !", 401));
+const fetchProfile = catchAsyncError(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    // Ensure if user exists in request
+    if (!req.user) return next(new ErrorHandler("Unauthorized user!", 401));
 
     const { _id } = req.user;
 
-    try{
-        // find user by ID
+    try {
+        // Find user by ID
         const user = await User.findById(_id);
 
-        // check if user exists
-        if(!user) return next(new ErrorHandler("User not found", 404));
+        // Check if user exists
+        if (!user) return next(new ErrorHandler("User not found", 404));
+
+        // Fetch task counts
+        const totalTasks = await Task.countDocuments({ userId: _id });
+        const completedTasks = await Task.countDocuments({ userId: _id, status: "completed" });
+        const inProgressTasks = await Task.countDocuments({ userId: _id, status: "in-progress" });
+        const pendingTasks = await Task.countDocuments({ userId: _id, status: "pending" });
 
         res.status(200).json({
             status: "success",
-            data: [user],
-            message: "User fetched successfully.",
-        })
-    }catch(error: any){
+            data: {
+                user,
+                taskStats: {
+                    totalTasks,
+                    completedTasks,
+                    inProgressTasks,
+                    pendingTasks,
+                }
+            },
+            message: "User profile and task stats fetched successfully.",
+        });
+    } catch (error: any) {
         next(new ErrorHandler(error.message || "Internal server error", 500));
     }
-})
+});
+
+
 
 
 export {registerUser, editUser, fetchProfile};

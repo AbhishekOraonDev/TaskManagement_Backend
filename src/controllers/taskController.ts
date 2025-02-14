@@ -5,10 +5,11 @@ import ErrorHandler from "../utils/ErrorHandler";
 import Joi from "joi";
 import Task from "../models/taskModel";
 import mongoose from "mongoose";
+import { io } from "../index";
 
 // Create task schema
 const createTaskSchema = Joi.object({
-    taskName: Joi.string().min(5).max(100).required(),
+    taskName: Joi.string().min(1).max(100).required(),
     status: Joi.string().valid("pending", "in-progress", "completed").default("pending"),
 });
 
@@ -37,18 +38,23 @@ const createTask = catchAsyncError(async (req: AuthenticatedRequest, res: Respon
     // Save task object
     await task.save();
 
+    // taskcreated real-time update
+    io.emit('taskCreated', {
+        task,
+        userId: _id
+    });
+
     res.status(201).json({
         success: true,
         data: task,
         message: "Task created successfully",
     });
-}
-);
+});
 
 
 // update task schema
 const updateTaskSchema = Joi.object({
-    taskName: Joi.string().min(5).max(100),
+    taskName: Joi.string().min(1).max(100),
     status: Joi.string().valid("pending", "in-progress", "completed"),
 }).or("taskName", "status");
 
@@ -76,6 +82,12 @@ const updateTask = catchAsyncError(async (req: AuthenticatedRequest, res: Respon
     // Save updated task
     await task.save();
 
+    // taskupdate real-time update
+    io.emit('taskUpdated', {
+        task,
+        userId: _id
+    });
+
     res.status(200).json({
         success: true,
         data: task,
@@ -87,8 +99,8 @@ const updateTask = catchAsyncError(async (req: AuthenticatedRequest, res: Respon
 
 // fetch task schema
 const fetchTasksSchema = Joi.object({
-    search: Joi.string().optional(), // Search by taskName (optional)
-    status: Joi.string().valid("pending", "in-progress", "completed").optional(), // Filter by status
+    search: Joi.string().allow("").optional(), // Search by taskName (optional)
+    status: Joi.string().valid("pending", "in-progress", "completed").allow("").optional(), // Filter by status
     page: Joi.number().min(1).default(1), // Pagination (default: page 1)
     limit: Joi.number().min(1).max(100).default(10), // Limit (default: 10, max: 100)
 });
@@ -180,6 +192,12 @@ const deleteTask = catchAsyncError(
 
         //  Delete task
         await Task.findByIdAndDelete(taskId);
+
+        // DeleteTask real-time 
+        io.emit('taskDeleted', {
+            taskId,
+            userId: _id
+        });
 
         res.status(200).json({
             success: true,
