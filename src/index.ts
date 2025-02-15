@@ -23,18 +23,18 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // -----------------Middleware----------------------
-const prodOrigins = [process.env.CLIENT_URL];
-const devOrigin = ["http://localhost:5173/"];
-const allowedOrigins = process.env.NODE_ENV === "production" ? prodOrigins : devOrigin
+const allowedOrigins = [
+  'https://task-management-frontend-wine.vercel.app/',
+  'https://task-management-frontend-jy4soltvl-daash23s-projects.vercel.app'
+];
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin)) {
-        console.log(origin, allowedOrigins);
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
