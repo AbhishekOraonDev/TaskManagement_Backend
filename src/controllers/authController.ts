@@ -26,10 +26,18 @@ const logUser = catchAsyncError(async (req: AuthenticatedRequest, res: Response,
     const existingToken = req.cookies.access_token;
     if (existingToken) {
         try {
-            jwt.verify(existingToken, process.env.JWT_SECRET_KEY as string);
-            return next(new ErrorHandler("User already logged in. Please logout first.", 403));
-        } catch {
-            console.log("Existing token invalid, allowing login.");
+            // Verify the token
+            const decoded = jwt.verify(existingToken, process.env.JWT_SECRET_KEY as string) as { _id: string };
+
+            // Check if the token is blacklisted
+            const isBlacklisted = await BlackList.findOne({ token: existingToken });
+            if (isBlacklisted) {
+                console.log("Token is blacklisted, allowing login.");
+            } else {
+                return next(new ErrorHandler("User already logged in. Please logout first.", 403));
+            }
+        } catch (err) {
+            console.log("Existing token invalid or expired, allowing login.");
         }
     }
 
