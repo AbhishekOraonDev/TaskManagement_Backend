@@ -63,7 +63,7 @@ const logUser = catchAsyncError(async (req: AuthenticatedRequest, res: Response,
         // Set cookie for authentication
         res.cookie("access_token", token, {
             httpOnly: true, 
-            sameSite: "lax",
+            sameSite: "none",
             secure: true, 
             maxAge: 24 * 60 * 60 * 1000, 
         });
