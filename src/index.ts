@@ -24,7 +24,7 @@ connectDB();
 
 // -----------------Middleware----------------------
 const allowedOrigins = [
-  'https://task-management-frontend-wine.vercel.app/',
+  'https://task-management-frontend-wine.vercel.app',
   'https://task-management-frontend-jy4soltvl-daash23s-projects.vercel.app'
 ];
 
@@ -39,6 +39,7 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }));
 
 app.use(express.json());
