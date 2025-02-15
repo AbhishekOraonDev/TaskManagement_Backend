@@ -25,7 +25,7 @@ connectDB();
 // -----------------Middleware----------------------
 app.use(
   cors({
-    origin: "https://task-management-frontend-5ajobql2o-daash23s-projects.vercel.app",
+    origin: "https://task-management-frontend-mvuayk71q-daash23s-projects.vercel.app",
     credentials: true,
   })
 );
