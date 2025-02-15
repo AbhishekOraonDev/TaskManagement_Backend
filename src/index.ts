@@ -24,8 +24,8 @@ connectDB();
 
 // -----------------Middleware----------------------
 const allowedOrigins = [
-  'https://task-management-frontend-wine.vercel.app',
-  'https://task-management-frontend-jy4soltvl-daash23s-projects.vercel.app'
+  process.env.ORIGIN1,
+  process.env.ORIGIN2
 ];
 
 app.use(
