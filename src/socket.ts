@@ -8,7 +8,7 @@ dotenv.config();
 export const setupWebSocket = (server: HttpServer) => {
   const io = new Server(server, {
     cors: {
-      origin: "https://task-management-frontend-5ajobql2o-daash23s-projects.vercel.app",
+      origin: process.env.ORIGIN2,
       methods: ["GET", "POST"],
       credentials: true,
     },
